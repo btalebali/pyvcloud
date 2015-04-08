@@ -46,3 +46,6 @@ assert the_network
 task = the_vapp.connect_to_network(network, the_network.get_href(), 'bridged')
 print task.get_status()
 assert 'success' == task.get_status()
+
+
+# testing
