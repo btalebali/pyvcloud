@@ -234,6 +234,19 @@ def updateVMdetails(vca,vcloudconfig,vcloudVM,logging):
     return True
 
 
+def updateVMstatus(vca,vcloudconfig,vcloudVM,logging):
+    vappc = findvApp(vca=vca,vdc_name=vcloudconfig['vdc_name'], vAppname=vcloudVM['vAppname'],logging=logging)
+    vmdetails=vappc.get_vms_details()
+    if len(vmdetails)==1:
+        vcloudVM['status'] = vmdetails[0]['status']
+    else:
+        logging.warning("Many VMs exists in this vAppTemplate , please reconfigure a vApptemplate with one VM ")
+        return False
+    return True
+
+
+
+
 def customizevApp(vca,vcloudconfig,vcloudVM,logging):
     
     vappc = findvApp(vca=vca,vdc_name=vcloudconfig['vdc_name'], vAppname=vcloudVM['vAppname'],logging=logging)
