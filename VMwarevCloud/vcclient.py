@@ -5,23 +5,24 @@ import logging
 from random import randint
 from requests.exceptions import SSLError
 from twisted.trial.unittest import Todo
+from time import sleep
 
 maxwait =  120
 
 
 # print information
-def print_vca(vca):
+def print_vca(vca,logging1):
     if vca:
-        print 'vca token:            ', vca.token
+        logging1.info('vca token:            ', vca.token)
         if vca.vcloud_session:
-            print 'vcloud session token: ', vca.vcloud_session.token
-            print 'org name:             ', vca.vcloud_session.org
-            print 'org url:              ', vca.vcloud_session.org_url
-            print 'organization:         ', vca.vcloud_session.organization
+            logging1.info('vcloud session token: ', vca.vcloud_session.token)
+            logging1.info('org name:             ', vca.vcloud_session.org)
+            logging1.info('org url:              ', vca.vcloud_session.org_url)
+            logging1.info('organization:         ', vca.vcloud_session.organization)
         else:
-            print 'vca vcloud session:   ', vca.vcloud_session
+            logging1.info('vca vcloud session:   ', vca.vcloud_session)
     else:
-        print 'vca: ', vca
+        logging1.info('vca: ', vca)
         
 
 # test vcloud session
@@ -61,18 +62,34 @@ def get_all_vapp(self, vdc):
             listvApp = listvApp + vapp
     return listvApp
 
-def authenticatevcd(host,org,username,password,service_type,VCD_version,verify,logging):
-    vca = VCA(host=host, username=username, service_type=service_type, version=VCD_version, verify=False)
-    bool = vca.login(password = password, org=org)
-    if(bool):
-        logging.info("authenification succeeded")
-        bool = vca.login(token = vca.token, org=org, org_url=vca.vcloud_session.org_url)
-        return vca
-    else:
-        logging.warning("authenification failed, please verify credentials")
-        sys.exit(0)
-
-
+def authenticatevc_service(vcloudconfig,logging):
+    if(vcloudconfig['service_type_name']=='vcd'):
+        vca = VCA(host=vcloudconfig['host'], username=vcloudconfig['username'], service_type=vcloudconfig['service_type_name'], version=vcloudconfig['VCD_version'], verify=vcloudconfig['cert'])
+        bool1 = vca.login(password = vcloudconfig['password'], org=vcloudconfig['org'])
+        bool2 = vca.login(token = vca.token, org=vcloudconfig['org'], org_url=vca.vcloud_session.org_url)
+        if(bool1 & bool2):
+            logging.info("authenification succeeded")
+            return vca
+        else:
+            logging.warning("authenification failed, please verify credentials")
+            return False
+    if(vcloudconfig['service_type_name']=='ondemand'):
+            vca = VCA(host=vcloudconfig['host'], username=vcloudconfig['username'], service_type=vcloudconfig['service_type_name'], version=vcloudconfig['VCD_version'], verify=vcloudconfig['cert'])
+            bool1 = vca.login(password = vcloudconfig['password'])
+            #print_vca(vca,logging)
+            bool2 = vca.login_to_instance(password=vcloudconfig['password'], instance=vcloudconfig['instance'], token=None, org_url=None)
+            #print_vca(vca,logging)
+            bool3 = vca.login_to_instance(instance=vcloudconfig['instance'], password=vcloudconfig['password'], token=vca.vcloud_session.token, org_url=vca.vcloud_session.org_url)
+            #print_vca(vca,logging)
+            bool4 = vca.login(token=vca.token)
+            if(bool1 & bool2 & bool3 & bool4):
+                logging.info("authenification succeeded")
+                return vca
+            else:
+                logging.warning("authenification failed, please verify credentials")
+                return False
+            #sample login sequence on vCloud Air On Demand
+            #vca = VCA(host=host, username=username, service_type='ondemand', version='5.7', verify=True)
 def findvDC(vca,vdc_name,logging):
     vDC = vca.get_vdc(vdc_name=vdc_name)
     if (vDC):
@@ -80,7 +97,7 @@ def findvDC(vca,vdc_name,logging):
         return vDC
     else:
         logging.error(("virtual datacenter not founded, please verify vDC name"))
-        sys.exit(0)
+        return False
 
 
 def findvApptemplate(vca,vDC,vApptemplate,logging):
@@ -169,10 +186,49 @@ def connect_VM_to_vDCnet(vca,vcloudconfig,vcloudVM,vCloudvDCnet,Nethref,logging)
     #block task
     return True
 
-def allocate_publicIP_on_GW(GW, vcloudVM,logging):
+def block_task_to_complete(vca,task,logging):
+    #TODO add Time out when wainting for Task
+    if((task == False) | (task == None)):
+        logging.error('An error occured while waiting for task')
+        return False
+    elif (task ==True):
+        time.sleep(30)
+        logging.info("waiting 30s  after task creation")
+        return True
+    else:
+        result = vca.block_until_completed(task)
+        if(result == False):
+            logging.error('An error occured  while waiting for task')
+            return False
+        else:
+            logging.info("Task finished")
+            return True
+
+
+
+def allocate_publicIP_on_GW(vca,GW, vcloudVM,vcloudconfig,vCloudvDCnet,logging):
+    publiciplist = GW.get_public_ips()
+    if(publiciplist==[]):
+        # try to allocate public IP
+        task = GW.allocate_public_ip()
+        if((task == False) | (task == None)):
+            logging.error('An error occured while allocating public IP, please contact your cloud administrator')
+            return False
+        elif (task ==True):
+            time.sleep(20)
+            logging.info("public IP allocation succeeded")
+        else:
+            result = vca.block_until_completed(task)
+            if(result == False):
+                logging.error('An error occured  while allocating public IP, please contact your cloud administrator')
+                return False
+            else:
+                logging.info("public IP allocation succeeded")
+    GW = findEdgegateway ( vca = vca, vdc_name = vcloudconfig['vdc_name'], GWname = vCloudvDCnet['GWname'],logging = logging)
     publiciplist = GW.get_public_ips()
     if (len(publiciplist) > 0):
-        vcloudVM['publicaddress'] = publiciplist[randint(1,len(publiciplist))]
+        vcloudVM['publicaddress'] = publiciplist[randint(1,len(publiciplist))-1]
+        GW = findEdgegateway ( vca = vca, vdc_name = vcloudconfig['vdc_name'], GWname = vCloudvDCnet['GWname'],logging = logging)
         return True
     else:
         logging.warning('No available public IP in the Gateway. Pleese Contact your Cloud administrator \n')
@@ -181,41 +237,77 @@ def allocate_publicIP_on_GW(GW, vcloudVM,logging):
 
 def configuredhcp(GW,vCloudvDCnet,logging):
     result=GW.enable_dhcp(enable=False)
-    logging.info('save services configuration')
     try:
-        result = GW.save_services_configuration()
-    except SSLError:
-        logging.warning("Certificate verify failed")
-        return False
-    return True
-
-def configureNat(GW,vcloudVM,vCloudvDCnet,logging):
-#Configure SNAT
-    result = GW.add_nat_rule(rule_type='SNAT', original_ip=vcloudVM['privateaddress'], original_port='Any', translated_ip=vcloudVM['publicaddress'], translated_port='Any', protocol='Any')
-#configure DNAT
-    result = GW.add_nat_rule(rule_type='DNAT', original_ip=vcloudVM['publicaddress'], original_port='Any', translated_ip=vcloudVM['privateaddress'], translated_port='Any', protocol='Any')
-    try:
-        result = GW.save_services_configuration()
+        task1 = GW.save_services_configuration()
+        bool1=block_task_to_complete(vca,task1,logging)
     except SSLError:
         logging.warning("Certificate verification failed")
         return False
-    return True
-
-def configureFWrules(GW,vcloudVM,vCloudvDCnet,logging):
-    result=GW.enable_fw(enable=True)
-    # TODO : Setting firewall rules vCloudvDCnet['FWrules']
-    result = GW.add_fw_rule(is_enable=True, description='external SSH access', policy='allow', protocol='Any', dest_port='22', dest_ip=vcloudVM['publicaddress'],source_port='Any', source_ip='external', enable_logging=False)
-    result = GW.add_fw_rule(is_enable=True, description='external http access', policy='allow', protocol='Any', dest_port='80', dest_ip=vcloudVM['publicaddress'],source_port='Any', source_ip='external', enable_logging=False)
-    result = GW.add_fw_rule(is_enable=True, description='external https access', policy='allow', protocol='Any', dest_port='443', dest_ip=vcloudVM['publicaddress'],source_port='Any', source_ip='external', enable_logging=False)
-    result = GW.add_fw_rule(is_enable=True, description='external cosacs access', policy='allow', protocol='Any', dest_port='8286', dest_ip=vcloudVM['publicaddress'],source_port='Any', source_ip='external', enable_logging=False)
-    logging.info('save services configuration')
+    return bool1
+def configureSNat(vca,vcloudconfig,vcloudVM,vCloudvDCnet,logging):
+#Configure SNAT
+    print(vcloudVM)
+    GW = findEdgegateway ( vca = vca, vdc_name = vcloudconfig['vdc_name'], GWname = vCloudvDCnet['GWname'],logging = logging)
+    result = GW.add_nat_rule(rule_type='SNAT', original_ip=vcloudVM['privateaddress'], original_port='-1', translated_ip=vcloudVM['publicaddress'], translated_port='-1', protocol='Any')
     try:
-        result = GW.save_services_configuration()
+        task1 = GW.save_services_configuration()
+        bool1=block_task_to_complete(vca,task1,logging)
+    except SSLError:
+        logging.warning("Certificate verification failed")
+        return False
+    return bool1
+def configureDNat(vca,vcloudconfig,vcloudVM,vCloudvDCnet,logging):
+#configure DNAT for public access
+        GW = findEdgegateway ( vca = vca, vdc_name = vcloudconfig['vdc_name'], GWname = vCloudvDCnet['GWname'],logging = logging)
+        result = GW.add_nat_rule(rule_type='DNAT', original_ip=vcloudVM['publicaddress'], original_port='Any', translated_ip=vcloudVM['privateaddress'], translated_port='Any', protocol='TCP_UDP')
+        try:
+            task1 = GW.save_services_configuration()
+            bool1=block_task_to_complete(vca,task2,logging)
+        except SSLError:
+            logging.warning("Certificate verification failed")
+            return False
+        return bool1
+
+def configureFWrules(vca,GW,vcloudVM,vCloudvDCnet,logging):
+    result=GW.enable_fw(enable=True)
+    try:
+        task1 = GW.save_services_configuration()
+        bool1=block_task_to_complete(vca,task1,logging)
     except SSLError:
         logging.warning("Certificate verify failed")
         return False
-    return True
-
+    # TODO : Setting firewall rules vCloudvDCnet['FWrules']
+    result = GW.add_fw_rule(is_enable=True, description='external SSH access', policy='allow', protocol='Tcp', dest_port='22', dest_ip=vcloudVM['publicaddress'],source_port='Any', source_ip='external', enable_logging=False)
+    try:
+        task2 = GW.save_services_configuration()
+        bool2=block_task_to_complete(vca,task2,logging)
+    except SSLError:
+        logging.warning("Certificate verify failed")
+        return False
+    result = GW.add_fw_rule(is_enable=True, description='external http access', policy='allow', protocol='Tcp', dest_port='80', dest_ip=vcloudVM['publicaddress'],source_port='Any', source_ip='external', enable_logging=False)
+    try:
+        task3 = GW.save_services_configuration()
+        bool3=block_task_to_complete(vca,task3,logging)
+    except SSLError:
+        logging.warning("Certificate verify failed")
+        return False
+    result = GW.add_fw_rule(is_enable=True, description='external https access', policy='allow', protocol='Tcp', dest_port='443', dest_ip=vcloudVM['publicaddress'],source_port='Any', source_ip='external', enable_logging=False)
+    try:
+        task4 = GW.save_services_configuration()
+        bool4=block_task_to_complete(vca,task4,logging)
+    except SSLError:
+        logging.warning("Certificate verify failed")
+        return False
+    result = GW.add_fw_rule(is_enable=True, description='external cosacs access', policy='allow', protocol='Tcp', dest_port='8286', dest_ip=vcloudVM['publicaddress'],source_port='Any', source_ip='external', enable_logging=False)
+    logging.info('save services configuration')
+    try:
+        task5 = GW.save_services_configuration()
+        bool5=block_task_to_complete(vca,task5,logging)
+    except SSLError:
+        logging.warning("Certificate verify failed")
+        return False
+    
+    return bool1 & bool2 & bool3 & bool4 & bool5
 
 
 def updateVMdetails(vca,vcloudconfig,vcloudVM,logging):
@@ -253,17 +345,8 @@ def customizevApp(vca,vcloudconfig,vcloudVM,logging):
     task  = vappc.customize_guest_os(vm_name=vcloudVM['name'], customization_script=vcloudVM['customization_script'],computer_name = vcloudVM['computer_name'],
                                      admin_password = vcloudVM['rootpassword'], reset_password_required = False)
     ### Block until task completed
-    if((task == False) | (task == None)):
-        logging.error('An error occured while reconfiguring vApp, please contact your cloud administrator')
-        return False
-    else:
-        result = vca.block_until_completed(task)
-        if(result == False):
-            logging.error('An error occured while reconfiguring vApp, please contact your cloud administrator')
-            return False
-        else:
-            logging.info("reconfiguring vApp succeeded")
-            return True
+    bool = block_task_to_complete(vca,task,logging)
+    return bool
 
 def update_VM_net_info(vca,vcloudVM,vcloudconfig,logging):
     vappc = findvApp(vca=vca,vdc_name=vcloudconfig['vdc_name'], vAppname=vcloudVM['vAppname'],logging=logging)

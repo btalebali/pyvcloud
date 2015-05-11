@@ -4,11 +4,11 @@ from time import sleep
 
 
 ############## vCloud Director Standalone loding params (two dictionaries)
-vcloudconfig={'host': 'vcloudcell.prologue.prl', 'username': 'uicbm', 'password': 'u15i21cb21m0',
-              'org': 'prologue', 'vdc_name': 'vDC_prologue','service_type_name': 'vcd','VCD_version':'5.5','cert': False}
+vcloudconfig={'host': '172.17.117.108', 'username': 'uicbm', 'password': 'u15i21cb21m0',
+              'org': 'prologue', 'instance':'','vdc_name': 'vDC_prologue','service_type_name': 'vcd','VCD_version':'5.5','cert': False,'logFile':'pyvca.log'}
 
 vcloudVM= {'vApptemplate': 'Ubuntu12.04 x86_64', 'cataloguen': 'Linux','vAppname': 'VM40','status':'','name':'','cpus':'',
-           'memory':'','owner':'','os':'','rootpassword':'','computer_name':'uicb','privateaddress':'','publicaddress':'','macaddress':'','customization_script':'touch /tmp/file1219'}
+           'memory':'','owner':'','os':'','rootpassword':'','computer_name':'uicb','privateaddress':'','publicaddress':'','macaddress':'','customization_script':'touch /tmp/file1219','access':'public','region':''}
 
 
 vCloudvDCnet={'GWname':'EdgeGW','vDCorg_net':'vDCORGnet4','start_address':'10.10.40.2','end_address':'10.10.40.50','gateway_ip':'10.10.40.1',
@@ -19,7 +19,7 @@ result = create_VM(vcloudVM,vcloudconfig,vCloudvDCnet)
 print(result,vcloudVM)
 time.sleep(30)
 
-
+'''
 result = poweroff_VM(vcloudVM,vcloudconfig,vCloudvDCnet)
 print(result,vcloudVM)
 time.sleep(30)
@@ -49,3 +49,4 @@ time.sleep(30)
 result = delete_VM(vcloudVM,vcloudconfig,vCloudvDCnet)
 print(result,vcloudVM)
 time.sleep(30)
+'''
