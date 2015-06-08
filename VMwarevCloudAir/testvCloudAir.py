@@ -8,7 +8,7 @@ vcloudconfig={'host': 'iam.vchs.vmware.com', 'username': 'vcloudair@prologue.fr'
               'org': '', 'instance':'','vdc_name': 'VDC1','service_type_name': 'ondemand','VCD_version':'5.7','cert': True,'logFile':'pyvca.log'}
 
 
-vcloudVM= {'vApptemplate': 'CentOS64-32BIT', 'cataloguen': 'Public Catalog','vAppname': 'VM01','status':'','name':'','cpus':'',
+vcloudVM= {'vApptemplate': 'CentOS64-32BIT', 'cataloguen': 'Public Catalog','vAppname': 'VM03','status':'','name':'','cpus':'',
            'memory':'','owner':'','os':'','rootpassword':'','computer_name':'uicb','privateaddress':'','publicaddress':'','macaddress':'','customization_script':'touch /tmp/file1219','access':'public','region':''}
 
 
@@ -67,8 +67,7 @@ time.sleep(30)
 result = delete_VM(vcloudVM,vcloudconfig,vCloudvDCnet)
 print(result,vcloudVM)
 time.sleep(30)
+
+
 '''
-
-
-
 
