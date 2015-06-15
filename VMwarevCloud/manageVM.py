@@ -6,6 +6,7 @@ import random
 import sys, traceback
 import requests
 from random import randint
+
 ####logging
 import logging
 import httplib
@@ -17,19 +18,20 @@ import urlparse
 
 def create_VM(vcloudVM,vcloudconfig,vCloudvDCnet):
         #### Initialise Logging params*
-    httplib.HTTPConnection.debuglevel = 1
+    httplib.HTTPConnection.debuglevel = 2
     logging.basicConfig(filename=vcloudconfig['logFile'],level=logging.DEBUG)
-    logging.getLogger().setLevel(logging.DEBUG)
+    logging.getLogger().setLevel(logging.INFO)
     requests_log = logging.getLogger("requests.packages.urllib3")
     requests_log.setLevel(logging.DEBUG)
-    #TODO Add rotate to log file
+    #requests.packages.urllib3.disable_warnings()
+    
     
     #generate root password
     lst = [random.choice(string.ascii_letters + string.digits) for n in xrange(8)]
     vcloudVM['rootpassword'] ="".join(lst)
     vca = authenticatevc_service(vcloudconfig=vcloudconfig,logging=logging)
     vDC= findvDC(vca=vca,vdc_name=vcloudconfig['vdc_name'],logging=logging)
-    result = findvApptemplate(vca=vca, vDC=vDC, vApptemplate=vcloudVM['vApptemplate'], logging=logging)
+    #result = findvApptemplate(vca=vca, vDC=vDC, vApptemplate=vcloudVM['vApptemplate'], logging=logging)
     ###List vailable vApps:  not already implemented
     pass
     ######Get quota not already implemented
@@ -44,8 +46,10 @@ def create_VM(vcloudVM,vcloudconfig,vCloudvDCnet):
     ###create vApp from existing vApptemplate
     ### Set up VM flavor not already implementded
     task = vca.create_vapp(vdc_name=vcloudconfig['vdc_name'], vapp_name=vcloudVM['vAppname'], template_name=vcloudVM['vApptemplate'],
-                         catalog_name=vcloudVM['cataloguen'], network_name=None, vm_name=None, vm_cpus = None,
-                         vm_memory=None, deploy='false',poweron='false')
+                         catalog_name=vcloudVM['cataloguen'], network_name=None, vm_name=None, vm_cpus = vcloudVM['cpus'],
+                         vm_memory=vcloudVM['memory'], deploy='false',poweron='false')
+    #VMname, CPU and MEMORy don't work , probleme will be corected soon
+    #https://github.com/vmware/pyvcloud/issues/41#issuecomment-109948905
     
     ###Block until task completed
     bool = block_task_to_complete(vca,task,logging)
@@ -54,43 +58,54 @@ def create_VM(vcloudVM,vcloudconfig,vCloudvDCnet):
     result = updateVMdetails(vca=vca,vcloudconfig=vcloudconfig,vcloudVM=vcloudVM,logging=logging)
     ##customize vApp 
     result = customizevApp(vca=vca,vcloudconfig=vcloudconfig,vcloudVM=vcloudVM,logging=logging) 
+    #personalization script did not run
+    
+    
     #################Network Configuration
     ##### Find Edge gateway
     GW = findEdgegateway ( vca = vca, vdc_name = vcloudconfig['vdc_name'], GWname = vCloudvDCnet['GWname'],logging = logging)
+
     ###create or get vDC net
     Nethref= get_or_create_vDCnet(vca=vca,vdc_name = vcloudconfig['vdc_name'],vCloudvDCnet=vCloudvDCnet,logging=logging)
+
     #### Connect VM under vApp to  vDC network
     result = connect_VM_to_vDCnet(vca=vca,vcloudconfig=vcloudconfig,vcloudVM=vcloudVM,vCloudvDCnet=vCloudvDCnet,Nethref=Nethref,logging=logging) 
+
     ###Update VM's Network params
     result=update_VM_net_info(vca=vca,vcloudVM=vcloudVM,vcloudconfig=vcloudconfig,logging=logging)
+
     ####Configure Firewall rules , DNAT, SNAT in the Edge gateway
     #Allocate public IP
     #Allocate public IP in the chosen Gateway
     result= allocate_publicIP_on_GW(vca=vca,GW=GW,vcloudVM=vcloudVM,vcloudconfig=vcloudconfig,vCloudvDCnet=vCloudvDCnet,logging=logging)
     print(vcloudVM['publicaddress'])
-    #Configure dhcp
-    # Notes: For VCA 'add_dhcp_service' is not defined !!!
-    #result = configuredhcp(GW=GW,vCloudvDCnet=vCloudvDCnet,logging=logging)
 
     #Configure Firewall rules
     vca = authenticatevc_service(vcloudconfig=vcloudconfig,logging=logging)
+
+        #Configure Nat rules
+    vca = authenticatevc_service(vcloudconfig=vcloudconfig,logging=logging)
+    
+    #erreur SSL la verification n'est pas etablie
+    
+    result = configureSNat(vca=vca,vcloudconfig=vcloudconfig,vcloudVM=vcloudVM,vCloudvDCnet=vCloudvDCnet,logging=logging)
+    #sys.exit()
+    
+    if(vcloudVM['access']=='public'):
+        result = configureDNat(vca=vca,vcloudconfig=vcloudconfig,vcloudVM=vcloudVM,vCloudvDCnet=vCloudvDCnet,logging=logging)
+    time.sleep(5)
+    
     result = configureFWrules(vca=vca,GW=GW,vcloudVM=vcloudVM,vCloudvDCnet=vCloudvDCnet,logging=logging)
 
         ##power on vApp
     logging.info("First powering on with force guest customization")
     vappc = findvApp(vca=vca,vdc_name=vcloudconfig['vdc_name'], vAppname=vcloudVM['vAppname'],logging=logging)
     task  = vappc.force_customization(vm_name=vcloudVM['name'])
-    
-    bool = block_task_to_complete(vca,task,logging)
-        #Configure Nat rules
-    vca = authenticatevc_service(vcloudconfig=vcloudconfig,logging=logging)
-    result = configureSNat(vca=vca,vcloudconfig=vcloudconfig,vcloudVM=vcloudVM,vCloudvDCnet=vCloudvDCnet,logging=logging)
-    if(vcloudVM['access']=='public'):
-        result = configureDNat(vca=vca,vcloudconfig=vcloudconfig,vcloudVM=vcloudVM,vCloudvDCnet=vCloudvDCnet,logging=logging)
 
-    time.sleep(5)
+    bool = block_task_to_complete(vca,task,logging)
     result = updateVMstatus(vca=vca,vcloudconfig=vcloudconfig,vcloudVM=vcloudVM,logging=logging)
     return True
+
 
 def poweroff_VM(vcloudVM,vcloudconfig,vCloudvDCnet):
     #### Initialise Logging params*

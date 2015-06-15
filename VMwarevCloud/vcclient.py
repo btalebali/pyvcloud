@@ -6,6 +6,7 @@ from random import randint
 from requests.exceptions import SSLError
 from twisted.trial.unittest import Todo
 from time import sleep
+import sys, traceback
 
 maxwait =  120
 
@@ -45,11 +46,23 @@ def list_catalogue(vca):
         for i in range(0,len(catalogues)):
             print(catalogues[i].name)
 
-def list_vapptemplate(vdc,vca):
-    var=vca.get_vapptemplate(vdc)
-    if var:
-        for i in range(0,len(var)):
-            print(var[i].name)
+def list_vapptemplatepercatalogue(vca,vdc,cataloguename,logging):
+    #look for catalogue
+    catalogs = filter(lambda link: cataloguename == link.get_name() and link.get_type() == "application/vnd.vmware.vcloud.catalog+xml",
+                        vca.vcloud_session.organization.get_Link())
+    if len(catalogs) == 1:
+        vca.response = Http.get(catalogs[0].get_href(), headers=vca.vcloud_session.get_vcloud_headers(), verify=vca.verify, logger=vca.logger)
+        if vca.response.status_code == requests.codes.ok:
+            catalog = catalogType.parseString(vca.response.content, True)
+            catalog_items=catalog.get_CatalogItems().get_CatalogItem()
+    
+    if len(catalog_items)==0:
+        logging.info("Any avaible vApptemplate in",cataloguename)
+    listvApptemplatename=[]
+    for i in range(0,len(catalog_items)):
+        listvApptemplatename.append(catalog_items[i].get_name())
+    return listvApptemplatename
+    
 
 
 def get_all_vapp(self, vdc):
@@ -68,10 +81,10 @@ def authenticatevc_service(vcloudconfig,logging):
         bool1 = vca.login(password = vcloudconfig['password'], org=vcloudconfig['org'])
         bool2 = vca.login(token = vca.token, org=vcloudconfig['org'], org_url=vca.vcloud_session.org_url)
         if(bool1 & bool2):
-            logging.info("authenification succeeded")
+            logging.info("authentification succeeded")
             return vca
         else:
-            logging.warning("authenification failed, please verify credentials")
+            logging.warning("authentification failed, please verify credentials")
             return False
     if(vcloudconfig['service_type_name']=='ondemand'):
             vca = VCA(host=vcloudconfig['host'], username=vcloudconfig['username'], service_type=vcloudconfig['service_type_name'], version=vcloudconfig['VCD_version'], verify=vcloudconfig['cert'])
@@ -83,10 +96,10 @@ def authenticatevc_service(vcloudconfig,logging):
             #print_vca(vca,logging)
             bool4 = vca.login(token=vca.token)
             if(bool1 & bool2 & bool3 & bool4):
-                logging.info("authenification succeeded")
+                logging.info("authentification succeeded")
                 return vca
             else:
-                logging.warning("authenification failed, please verify credentials")
+                logging.warning("authentification failed, please verify credentials")
                 return False
             #sample login sequence on vCloud Air On Demand
             #vca = VCA(host=host, username=username, service_type='ondemand', version='5.7', verify=True)
@@ -101,7 +114,8 @@ def findvDC(vca,vdc_name,logging):
 
 
 def findvApptemplate(vca,vDC,vApptemplate,logging):
-    listvApptemplate = vca.get_vapptemplate(vDC)
+    listvApptemplate = vca._get_vdc_templates()
+    #get_vapptemplate(vDC) _get_vdc_templates
     for i in range(len(listvApptemplate)):
         if(listvApptemplate[i].name==vApptemplate):
             logging.info("vAppTemplate "+vApptemplate+" found")
@@ -253,9 +267,18 @@ def configureSNat(vca,vcloudconfig,vcloudVM,vCloudvDCnet,logging):
         task1 = GW.save_services_configuration()
         bool1=block_task_to_complete(vca,task1,logging)
     except SSLError:
-        logging.warning("Certificate verification failed")
+        logging.warning(" Certificate verification failed")
         return False
     return bool1
+'''
+    try:
+        task1 = GW.save_services_configuration()
+        bool1=block_task_to_complete(vca,task1,logging)
+    except SSLError:
+        logging.warning(" Certificate verification failed")
+        return False
+'''
+
 def configureDNat(vca,vcloudconfig,vcloudVM,vCloudvDCnet,logging):
 #configure DNAT for public access
         GW = findEdgegateway ( vca = vca, vdc_name = vcloudconfig['vdc_name'], GWname = vCloudvDCnet['GWname'],logging = logging)

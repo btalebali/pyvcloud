@@ -2304,3 +2304,67 @@ DEBUG:requests.packages.urllib3.connectionpool:"GET /api/compute/api/vdc/51b5460
 INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): uk-slough-1-6.vchs.vmware.com
 DEBUG:requests.packages.urllib3.connectionpool:"GET /api/compute/api/vApp/vapp-cc9f8279-9832-4389-8460-6b1eebc6c4cb HTTP/1.1" 200 4260
 INFO:root: VM03 found
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): iam.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"POST /api/iam/login HTTP/1.1" 201 60
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): iam.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"GET /api/sc/instances HTTP/1.1" 302 328
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): us-california-1-3.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"GET /api/sc/instances HTTP/1.1" 401 58
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): us-california-1-3.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"GET /api/sc/instances HTTP/1.1" 200 5008
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): iam.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"GET /api/sc/instances HTTP/1.1" 302 328
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): us-california-1-3.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"GET /api/sc/instances HTTP/1.1" 401 58
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): us-california-1-3.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"GET /api/sc/instances HTTP/1.1" 200 5008
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): iam.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"POST /api/iam/login HTTP/1.1" 201 60
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): iam.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"GET /api/sc/instances HTTP/1.1" 302 328
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): us-california-1-3.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"GET /api/sc/instances HTTP/1.1" 401 58
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): us-california-1-3.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"GET /api/sc/instances HTTP/1.1" 200 5008
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): iam.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"GET /api/sc/instances HTTP/1.1" 302 328
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): us-california-1-3.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"GET /api/sc/instances HTTP/1.1" 401 58
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): us-california-1-3.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"GET /api/sc/instances HTTP/1.1" 200 5008
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): iam.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"POST /api/iam/login HTTP/1.1" 201 60
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): iam.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"GET /api/sc/instances HTTP/1.1" 302 328
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): us-california-1-3.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"GET /api/sc/instances HTTP/1.1" 401 58
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): us-california-1-3.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"GET /api/sc/instances HTTP/1.1" 200 5008
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): iam.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"GET /api/sc/instances HTTP/1.1" 302 328
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): us-california-1-3.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"GET /api/sc/instances HTTP/1.1" 401 58
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): us-california-1-3.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"GET /api/sc/instances HTTP/1.1" 200 5008
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): iam.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"POST /api/iam/login HTTP/1.1" 201 60
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): iam.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"GET /api/sc/instances HTTP/1.1" 302 328
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): us-california-1-3.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"GET /api/sc/instances HTTP/1.1" 401 58
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): us-california-1-3.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"GET /api/sc/instances HTTP/1.1" 200 5008
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): uk-slough-1-6.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"POST /api/compute/api/sessions HTTP/1.1" 200 1952
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): uk-slough-1-6.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"GET /api/compute/api/org/44b27997-9893-4cde-a483-e0bff0d9180c HTTP/1.1" 200 763
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): iam.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"GET /api/sc/instances HTTP/1.1" 302 328
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): us-california-1-3.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"GET /api/sc/instances HTTP/1.1" 401 58
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): us-california-1-3.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"GET /api/sc/instances HTTP/1.1" 200 5008
+INFO:root:authenification succeeded
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTPS connection (1): uk-slough-1-6.vchs.vmware.com
+DEBUG:requests.packages.urllib3.connectionpool:"GET /api/compute/api/vdc/51b54607-e11d-4e7b-a0ad-e77ed1aeb3b7 HTTP/1.1" 200 1141
+INFO:root:virtual datacenter founded
