@@ -210,7 +210,10 @@ def block_task_to_complete(vca,task,logging):
         logging.info("waiting 30s  after task creation")
         return True
     else:
+        print("begin block task")
+        time.sleep(5)
         result = vca.block_until_completed(task)
+        print("end block task")
         if(result == False):
             logging.error('An error occured  while waiting for task')
             return False

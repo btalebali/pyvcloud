@@ -29,7 +29,7 @@ def create_VM(vcloudVM,vcloudconfig,vCloudvDCnet):
     vcloudVM['rootpassword'] ="".join(lst)
     vca = authenticatevc_service(vcloudconfig=vcloudconfig,logging=logging)
     vDC= findvDC(vca=vca,vdc_name=vcloudconfig['vdc_name'],logging=logging)
-    result = findvApptemplate(vca=vca, vDC=vDC, vApptemplate=vcloudVM['vApptemplate'], logging=logging)
+    #result = findvApptemplate(vca=vca, vDC=vDC, vApptemplate=vcloudVM['vApptemplate'], logging=logging)
     ###List vailable vApps:  not already implemented
     pass
     ######Get quota not already implemented

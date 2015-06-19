@@ -52,6 +52,7 @@ def create_VM(vcloudVM,vcloudconfig,vCloudvDCnet):
     #https://github.com/vmware/pyvcloud/issues/41#issuecomment-109948905
     
     ###Block until task completed
+    
     bool = block_task_to_complete(vca,task,logging)
 
     ###Update VM details

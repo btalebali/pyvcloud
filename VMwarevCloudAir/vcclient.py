@@ -6,6 +6,7 @@ from random import randint
 from requests.exceptions import SSLError
 from twisted.trial.unittest import Todo
 from time import sleep
+import sys, traceback
 
 maxwait =  120
 
@@ -100,14 +101,23 @@ def findvDC(vca,vdc_name,logging):
         return False
 
 
-def findvApptemplate(vca,vDC,vApptemplate,logging):
-    listvApptemplate = vca.get_vapptemplate(vDC)
-    for i in range(len(listvApptemplate)):
-        if(listvApptemplate[i].name==vApptemplate):
-            logging.info("vAppTemplate "+vApptemplate+" found")
-            return True
-    logging.error("vAppTemplate "+vApptemplate+" not found, please verify vApptemplate")
-    return False
+def list_vapptemplatepercatalogue(vca,vdc,cataloguename,logging):
+    #look for catalogue
+    catalogs = filter(lambda link: cataloguename == link.get_name() and link.get_type() == "application/vnd.vmware.vcloud.catalog+xml",
+                        vca.vcloud_session.organization.get_Link())
+    if len(catalogs) == 1:
+        vca.response = Http.get(catalogs[0].get_href(), headers=vca.vcloud_session.get_vcloud_headers(), verify=vca.verify, logger=vca.logger)
+        if vca.response.status_code == requests.codes.ok:
+            catalog = catalogType.parseString(vca.response.content, True)
+            catalog_items=catalog.get_CatalogItems().get_CatalogItem()
+    
+    if len(catalog_items)==0:
+        logging.info("Any avaible vApptemplate in",cataloguename)
+    listvApptemplatename=[]
+    for i in range(0,len(catalog_items)):
+        listvApptemplatename.append(catalog_items[i].get_name())
+    return listvApptemplatename
+    
 
 def findvApp(vca,vdc_name,vAppname,logging):
     vDC = vca.get_vdc(vdc_name=vdc_name)
