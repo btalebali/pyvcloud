@@ -82,7 +82,7 @@ def create_VM(vcloudVM,vcloudconfig,vCloudvDCnet):
     print(vcloudVM['publicaddress'])
 
     #Configure Firewall rules
-    vca = authenticatevc_service(vcloudconfig=vcloudconfig,logging=logging)
+    #Not used
 
         #Configure Nat rules
     vca = authenticatevc_service(vcloudconfig=vcloudconfig,logging=logging)
