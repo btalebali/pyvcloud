@@ -10,3 +10,11 @@ netaddr==0.7.13
 sudo apt-get install libxml2-dev libxslt-dev
 sudo apt-get install python-dev python-pip
 pip install pyvcloud
+
+
+
+For Python 2.7.9 add :
+pip install twisted
+ pip install  zope.interface 
+apt-get install python-gtk2
+apt-get install lib32z1-dev
