@@ -98,6 +98,51 @@ def create_VM(vcloudVM,vcloudconfig,vCloudvDCnet):
     
     result = configureFWrules(vca=vca,GW=GW,vcloudVM=vcloudVM,vCloudvDCnet=vCloudvDCnet,logging=logging)
 
+    if(vcloudVM['access']=='private'):
+        publicIPs = GW.get_public_ips()
+        if (len(publicIPs)>0):
+            pubIP=publicIPs[0]
+        else:
+            print ('No available public Ip on gateway, contact your cloud admin')
+        #### ADD SNAT (only one snat rule)
+        #refresh Gateway
+        GW = findEdgegateway ( vca = vca, vdc_name = vcloudconfig['vdc_name'], GWname = vCloudvDCnet['GWname'],logging = logging)
+        GWbusy=GW.is_busy()
+        step=4
+        i=0
+        while (GWbusy==True):
+            i=i+step
+            sleep(step)
+            GW = findEdgegateway ( vca = vca, vdc_name = vcloudconfig['vdc_name'], GWname = vCloudvDCnet['GWname'],logging = logging)
+            GWbusy=GW.is_busy()
+            if((i==120) & (GWbusy==True)):
+                print('Gateway is Busy for more than 2 mn, contact your cloud admin')
+                break
+        
+        result = GW.add_nat_rule(rule_type='SNAT', original_ip=vcloudVM['privateaddress'], original_port='-1', translated_ip=pubIP, translated_port='-1', protocol='Any')
+        task1 = GW.save_services_configuration()
+        bool1=block_task_to_complete(vca,task1,logging)
+        ### Add Firewall Rule
+        #refresh Gateway
+    GW = findEdgegateway ( vca = vca, vdc_name = vcloudconfig['vdc_name'], GWname = vCloudvDCnet['GWname'],logging = logging)
+    GWbusy=GW.is_busy()
+    step=4
+    i=0
+    while (GWbusy==True):
+        i=i+step
+        sleep(step)
+        GW = findEdgegateway ( vca = vca, vdc_name = vcloudconfig['vdc_name'], GWname = vCloudvDCnet['GWname'],logging = logging)
+        GWbusy=GW.is_busy()
+        if((i==120) & (GWbusy==True)):
+            print('Gateway is Busy for more than 2 mn, contact your cloud admin')
+            break
+    
+    result = GW.add_fw_rule(is_enable=True, description='out', policy='allow', protocol='Any', dest_port='Any', dest_ip='external',source_port='Any', source_ip=vcloudVM['privateaddress'], enable_logging=False)
+    task1 = GW.save_services_configuration()
+    bool1=block_task_to_complete(vca,task1,logging)
+    
+
+
         ##power on vApp
     logging.info("First powering on with force guest customization")
     vappc = findvApp(vca=vca,vdc_name=vcloudconfig['vdc_name'], vAppname=vcloudVM['vAppname'],logging=logging)

@@ -5,7 +5,7 @@ from time import sleep
 
 ############## Internat Prologue 's VMware vCloud Director
 vcloudconfig={'host': 'vcloudcell.prologue.prl', 'username': 'uicbm', 'password': 'u15i21cb21m0',
-              'org': 'prologue', 'instance':'','vdc_name': 'vDC_prologue','service_type_name': 'vcd','VCD_version':'5.5','cert': '/root/git/pyvcloud/VMwarevCloud/certvcloud.cer','logFile':'pyvcd.log'}
+              'org': 'prologue', 'instance':'','vdc_name': 'vDC_prologue','service_type_name': 'vcd','VCD_version':'5.5','cert': False,'logFile':'pyvcd.log'}
 
 
 
