@@ -1,6 +1,5 @@
 ####################################################################
 ####################################################################
-
 from pyvcloud.vcloudair import *
 from pyvcloud.vapp import *
 import json
@@ -47,7 +46,6 @@ while True:
   result=block_task_completed(host,username,password,organisation,version,task,60)
   if (the_gateway.response.ok==True):
     break
-
 
 print "result=", result
 print "response=", the_gateway.response.text
