@@ -4,7 +4,7 @@ from time import sleep
 
 
 ############## Internat Prologue 's VMware vCloud Director
-vcloudconfig={'host': 'vcloudcell.prologue.prl', 'username': 'uicbm', 'password': 'u15i21cb21m0',
+vcloudconfig={'host': 'vcloudcell.prologue.prl', 'username': 'xxxxx', 'password': 'xxxxxx',
               'org': 'prologue', 'instance':'','vdc_name': 'vDC_prologue','service_type_name': 'vcd','VCD_version':'5.5','cert': False,'logFile':'pyvcd.log'}
 
 
@@ -38,7 +38,7 @@ result = create_VM(vcloudVM,vcloudconfig,vCloudvDCnet)
 print(result,vcloudVM)
 time.sleep(30)
 
-'''
+
 result = poweroff_VM(vcloudVM,vcloudconfig,vCloudvDCnet)
 print(result,vcloudVM)
 time.sleep(30)
@@ -69,4 +69,3 @@ time.sleep(30)
 result = delete_VM(vcloudVM,vcloudconfig,vCloudvDCnet)
 print(result,vcloudVM)
 time.sleep(30)
-'''

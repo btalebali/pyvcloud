@@ -13,8 +13,8 @@ from pyclient import *
 from pyvcloud.vcloudair import *
 from pyvcloud.vapp import *
 host='https://vcloudcell.prologue.prl'
-username = "uicbm"
-password = "u15i21cb21m0"
+username = "xxxx"
+password = "xxxxx"
 servicetype = "vcd"
 organisation = "prologue"
 vdcname="vDC_prologue"
